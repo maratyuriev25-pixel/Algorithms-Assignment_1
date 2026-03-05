@@ -1,0 +1,43 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+[Bb]uild/
+[Bb]uilds/
+
+# NuGet
+*.nupkg
+packages/
+*.snupkg
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Others
+*.pidb
+*.pdb
+*.opendb
+*.svclog
+*.cache
+*.ilk
+*.meta
+*.tlog
+*.tmp
+*.tmp_proj
