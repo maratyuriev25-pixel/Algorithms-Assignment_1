@@ -4,18 +4,16 @@ using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 
-public class Queue
+public class CharQueue
 {
 	private const int Capacity = 50;
-	private char[] _array = new char[10];
+	private char[] _array = new char[50];
 	private int _index = 0;
 	private int _tail = 0;
 	private int _count = 0;
 	public void Enqueue(char element)
 	{
-			if (_count == Capacity)
-				throw new Exception("Queue overflow");
-
+			if (_count == Capacity) throw new Exception("Queue overflow");
 			_array[_tail] = element;
 			_tail = (_tail + 1) % Capacity;
 			_count++;
