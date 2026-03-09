@@ -32,11 +32,24 @@ public class Tokens
 
     public void processToken(char token)
     {
-        if(char.IsDigit(token) == true)
+        if (char.IsDigit(token) == true)
         {
             postFix.Enqueue(token);
         }
-        else if(IsOperator(token) == true)
+        else if (token == '(')
+        {
+            opStack.Push(token);
+        }
+        else if (token == ')')
+        {
+            while (opStack.Count() > 0 && opStack.Peek() != '(')
+            {
+                postFix.Enqueue(opStack.Pop());
+            }
+
+            opStack.Pop();
+        }
+        else if (IsOperator(token) == true)
         {
             while (opStack.Count() > 0 && Precedence(opStack.Peek()) >= Precedence(token))
             {
@@ -48,27 +61,58 @@ public class Tokens
     }
     public CharQueue ToPostFix(string infix)
     {
+        string number = "";
+
         foreach(char token in infix)
         {
-            processToken(token);
+            if(char.IsDigit(token) == true)
+                    number += token;
+            else
+            {
+                if (number != "")
+                {
+                    foreach(char c in number)
+                        postFix.Enqueue(c);
+
+                    postFix.Enqueue(' ');
+                    number = "";
+                }
+
+                processToken(token);    
+            }
+        }
+        if(number != "")
+        {
+            foreach (char c in number)
+                postFix.Enqueue(c);
+
+            postFix.Enqueue(' ');
         }
         while (opStack.Count() > 0)
         {
-            char op = opStack.Pop();
-            postFix.Enqueue(op);
+            postFix.Enqueue(opStack.Pop());
         }
         return postFix;
     }
     public float PostFixCalculation(CharQueue postFix)
     {
         FloatStack valueStack = new FloatStack();
+        string number = "";
 
         foreach(char i in postFix.ToArray())
         {
             float a = 0, b = 0;
             if (char.IsDigit(i))
             {
-                valueStack.Push(i - '0');
+                number += i;
+            }
+            else if(i == ' ')
+            {
+                if (number != " ")
+                {
+                    valueStack.Push(float.Parse(number));
+                    number = "";
+                }
             }
             else
             {
