@@ -13,10 +13,10 @@ namespace Algorithm_Assignment_1
 
                 Tokens t = new Tokens();
 
-                CharQueue postFix = t.ToPostFix(userInput);
-                char[] arr = postFix.ToArray();
-                string postfixString = new string(arr);
-                Console.WriteLine($"Postfix form: {postfixString}");
+                Queue postFix = t.ToPostFixCalc(userInput);
+                var result = t.ToPostFixView(userInput);
+
+                Console.WriteLine("Postfix form: " + string.Join(" ", result));
                 Console.WriteLine($"Result is: {t.PostFixCalculation(postFix)}");
             }
         }

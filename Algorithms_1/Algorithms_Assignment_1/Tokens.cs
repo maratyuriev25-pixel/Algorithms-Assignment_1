@@ -5,8 +5,8 @@ namespace Algorithm_Assignment_1;
 
 public class Tokens
 {
-    private CharQueue postFix = new CharQueue { }; //for numbers
-    private OperatorStack opStack = new OperatorStack { }; //for operations
+    private Queue postFix = new Queue { };
+    private OperatorStack opStack = new OperatorStack { };
 
     public bool IsOperator(char i)
     {
@@ -17,7 +17,7 @@ public class Tokens
             
     }
 
-    private int Precedence(char op)
+    private int Candidate(char op)
     {
         return op switch
         {
@@ -27,11 +27,10 @@ public class Tokens
             _ => 0
         };
     }
-    
-
+   
 
     public void processToken(char token)
-    {
+   {
         if (char.IsDigit(token) == true)
         {
             postFix.Enqueue(token);
@@ -51,7 +50,7 @@ public class Tokens
         }
         else if (IsOperator(token) == true)
         {
-            while (opStack.Count() > 0 && Precedence(opStack.Peek()) >= Precedence(token))
+            while (opStack.Count() > 0 && Candidate(opStack.Peek()) >= Candidate(token))
             {
                 postFix.Enqueue(opStack.Pop());
             }
@@ -59,7 +58,7 @@ public class Tokens
         }
 
     }
-    public CharQueue ToPostFix(string infix)
+    public Queue ToPostFixCalc(string infix)
     {
         string number = "";
 
@@ -92,9 +91,53 @@ public class Tokens
         {
             postFix.Enqueue(opStack.Pop());
         }
+
         return postFix;
     }
-    public float PostFixCalculation(CharQueue postFix)
+
+
+
+    public List<object> ToPostFixView(string infix)
+    {
+        List<string> numbers = new List<string>();
+        List<char> operators = new List<char>();
+        List<object> result = new List<object>();
+
+        string number = "";
+
+        foreach (char token in infix)
+        {
+            if (char.IsDigit(token) == true)
+                number += token;
+
+            else
+            {
+                if (number != "")
+                {
+                    numbers.Add(number);
+                    number = "";
+                }
+                if (IsOperator(token) == true)
+                    operators.Add(token);
+            }
+        }
+
+        if( number != "")
+        numbers.Add(number);
+
+        operators.Sort((a,b) => Candidate(b).CompareTo(Candidate(a)));
+
+        foreach(string token in numbers)
+            result.Add(token);
+
+        foreach(char token in operators)
+            result.Add(token.ToString());
+
+        return result;
+    }
+
+
+    public float PostFixCalculation(Queue postFix)
     {
         FloatStack valueStack = new FloatStack();
         string number = "";

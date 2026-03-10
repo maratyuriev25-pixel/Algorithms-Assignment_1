@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 
-public class CharQueue
+public class Queue
 {
 	private const int Capacity = 50;
 	private char[] _array = new char[50];
