@@ -2,12 +2,14 @@
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 namespace Algorithm_Assignment_1;
 
 public class Tokens
 {
     private Queue postFix = new Queue();
     private OperatorStack opStack = new OperatorStack();
+    private Dictionary<string, float> variables = new Dictionary<string, float>();
 
     public bool IsOperator(char i)
     {
@@ -97,6 +99,25 @@ public class Tokens
         }
 
     }
+
+    public void SetVariable(string input)
+    {
+        string[] parts = input.Split('=');
+        if (parts.Length != 2)
+            throw new Exception("Invalid variable assignment. Please use the format: variable = value");
+
+        string name = parts[0].Trim();
+        string expression = parts[1].Trim();
+
+        Queue postfix = ToPostFix(expression);
+        float value = PostFixCalculation(postfix);
+
+        variables[name] = value;
+        Console.WriteLine($"{name} = {value}");
+    }
+
+
+
     public Queue ToPostFix(string infix)
     {
 
@@ -113,6 +134,19 @@ public class Tokens
             if(IsUnaryMinus(token, i, infix))
             {
                 opStack.Push('u');
+                continue;
+            }
+
+            if (char.IsLetter(token) && token != 's' && token != 'c')
+            {
+                string varName = token.ToString();
+                if (!variables.ContainsKey(varName))
+                    throw new Exception($"Undefined variable: {varName}");
+
+                string varValueStr = variables[varName].ToString();
+                foreach (char c in varValueStr)
+                    postFix.Enqueue(c);
+                postFix.Enqueue(' ');
                 continue;
             }
 
@@ -173,8 +207,10 @@ public class Tokens
 
             else if(i == 'u')
             {
-               float a = valueStack.Pop();
-               valueStack.Push(-a);
+                if (valueStack.Count() < 1)
+                    throw new Exception("Unary minus: no operand");
+                float a = valueStack.Pop();
+                valueStack.Push(-a);
             }
 
             else if (i == 's')
