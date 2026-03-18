@@ -11,7 +11,7 @@ public class Tokens
 
     public bool IsOperator(char i)
     {
-        if ((i == '+') || (i == '-') || (i == '*') || (i == '/') || (i == ':') || (i == '^'))
+        if ((i == '+') || (i == '-') || (i == '*') || (i == '/') || (i == ':') || (i == '^') || (i == 'u') || (i == 'c') || (i == 's'))
             return true;
         else
             return false;
@@ -21,16 +21,26 @@ public class Tokens
     {
         return op switch
         {
-            '+' or '-' => 1,
-            '*' or '/' or ':' => 2,
+            'u' or 's' or 'c' => 4,
             '^' => 3,
+            '*' or '/' or ':' => 2,
+            '+' or '-' => 1,
             _ => 0
         };
+    }
+    private bool IsUnaryMinus(char token, int index, string infix)
+    {
+        if (token != '-') return false;
+        if (index == 0) return true;    
+        char prev = infix[index - 1];
+
+        return IsOperator(prev) || prev == '(' || prev == '|';
     }
    
 
     public void processToken(char token)
-   {
+    {
+
         if (char.IsDigit(token) == true)
         {
             postFix.Enqueue(token);
@@ -77,7 +87,7 @@ public class Tokens
                 opStack.Peek() != '|' &&
                 (
                     Candidate(opStack.Peek()) > Candidate(token) ||
-                    (Candidate(opStack.Peek()) == Candidate(token) && token != '^')
+                    (Candidate(opStack.Peek()) == Candidate(token) && token != '^' && token != 'u')
                 )
             )
             {
@@ -89,21 +99,30 @@ public class Tokens
     }
     public Queue ToPostFix(string infix)
     {
+
         postFix = new Queue();
         opStack = new OperatorStack();
         string number = "";
 
-        foreach(char token in infix)
+        infix = infix.Replace("sin", "s").Replace("cos", "c");
+
+        for (int i = 0; i <  infix.Length; i++)
         {
-            if(char.IsDigit(token) == true)
+            char token = infix[i];
+
+            if(IsUnaryMinus(token, i, infix))
+            {
+                opStack.Push('u');
+                continue;
+            }
+
+            if (char.IsDigit(token) == true)
                     number += token;
             else
             {
                 if (number != "")
                 {
-                    foreach(char c in number)
-                        postFix.Enqueue(c);
-
+                    foreach (char c in number) postFix.Enqueue(c); 
                     postFix.Enqueue(' ');
                     number = "";
                 }
@@ -113,11 +132,10 @@ public class Tokens
         }
         if(number != "")
         {
-            foreach (char c in number)
-                postFix.Enqueue(c);
-
+            foreach (char c in number) postFix.Enqueue(c);
             postFix.Enqueue(' ');
         }
+
         while (opStack.Count() > 0)
         {
             postFix.Enqueue(opStack.Pop());
@@ -133,10 +151,12 @@ public class Tokens
 
         foreach(char i in postFix.ToArray())
         {
+
             if (char.IsDigit(i))
             {
                 number += i;
             }
+
             else if (i == ' ')
             {
                 if (number != "")
@@ -145,10 +165,30 @@ public class Tokens
                     number = "";
                 }
             }
+
             else if (i == '|')
             {
                 valueStack.Push((float)Math.Abs(valueStack.Pop()));
             }
+
+            else if(i == 'u')
+            {
+               float a = valueStack.Pop();
+               valueStack.Push(-a);
+            }
+
+            else if (i == 's')
+            {
+                float a = valueStack.Pop();
+                valueStack.Push((float)Math.Sin(a*Math.PI/180));
+            }
+
+            else if (i == 'c')
+            {
+                float a = valueStack.Pop();
+                valueStack.Push((float)Math.Cos(a * Math.PI / 180));
+            }
+
             else
             {
                 if (valueStack.Count() < 2)
