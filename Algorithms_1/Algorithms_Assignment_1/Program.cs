@@ -13,10 +13,9 @@ namespace Algorithm_Assignment_1
 
                 Tokens t = new Tokens();
 
-                Queue postFix = t.ToPostFixCalc(userInput);
-                var result = t.ToPostFixView(userInput);
+                var postFix = t.ToPostFix(userInput);
 
-                Console.WriteLine("Postfix form: " + string.Join(" ", result));
+                Console.WriteLine("Postfix form: " + string.Join("", postFix.ToArray()));
                 Console.WriteLine($"Result is: {t.PostFixCalculation(postFix)}");
             }
         }

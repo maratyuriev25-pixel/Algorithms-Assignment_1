@@ -1,12 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 namespace Algorithm_Assignment_1;
 
 public class Tokens
 {
-    private Queue postFix = new Queue { };
-    private OperatorStack opStack = new OperatorStack { };
+    private Queue postFix = new Queue();
+    private OperatorStack opStack = new OperatorStack();
 
     public bool IsOperator(char i)
     {
@@ -14,7 +15,6 @@ public class Tokens
             return true;
         else
             return false;
-            
     }
 
     private int Candidate(char op)
@@ -22,7 +22,7 @@ public class Tokens
         return op switch
         {
             '+' or '-' => 1,
-            '*' or '/' => 2,
+            '*' or '/' or ':' => 2,
             '^' => 3,
             _ => 0
         };
@@ -35,22 +35,51 @@ public class Tokens
         {
             postFix.Enqueue(token);
         }
+
         else if (token == '(')
         {
             opStack.Push(token);
         }
+
         else if (token == ')')
         {
             while (opStack.Count() > 0 && opStack.Peek() != '(')
             {
                 postFix.Enqueue(opStack.Pop());
             }
+            if(opStack.Count() > 0)
+                opStack.Pop();
 
-            opStack.Pop();
         }
+        else if (token == '|')
+        {
+            if (opStack.Count() > 0 && opStack.Peek() == '|')
+            {
+                while (opStack.Count() > 0 && opStack.Peek() != '|')
+                {
+                    postFix.Enqueue(opStack.Pop());
+                }
+
+                opStack.Pop();
+                postFix.Enqueue('|');
+            }
+            else
+            {
+                opStack.Push(token);
+            }
+        }
+
         else if (IsOperator(token) == true)
         {
-            while (opStack.Count() > 0 && Candidate(opStack.Peek()) >= Candidate(token))
+            while (
+                opStack.Count() > 0 &&
+                opStack.Peek() != '(' &&
+                opStack.Peek() != '|' &&
+                (
+                    Candidate(opStack.Peek()) > Candidate(token) ||
+                    (Candidate(opStack.Peek()) == Candidate(token) && token != '^')
+                )
+            )
             {
                 postFix.Enqueue(opStack.Pop());
             }
@@ -58,8 +87,10 @@ public class Tokens
         }
 
     }
-    public Queue ToPostFixCalc(string infix)
+    public Queue ToPostFix(string infix)
     {
+        postFix = new Queue();
+        opStack = new OperatorStack();
         string number = "";
 
         foreach(char token in infix)
@@ -95,48 +126,6 @@ public class Tokens
         return postFix;
     }
 
-
-
-    public List<object> ToPostFixView(string infix)
-    {
-        List<string> numbers = new List<string>();
-        List<char> operators = new List<char>();
-        List<object> result = new List<object>();
-
-        string number = "";
-
-        foreach (char token in infix)
-        {
-            if (char.IsDigit(token) == true)
-                number += token;
-
-            else
-            {
-                if (number != "")
-                {
-                    numbers.Add(number);
-                    number = "";
-                }
-                if (IsOperator(token) == true)
-                    operators.Add(token);
-            }
-        }
-
-        if( number != "")
-        numbers.Add(number);
-
-        operators.Sort((a,b) => Candidate(b).CompareTo(Candidate(a)));
-
-        foreach(string token in numbers)
-            result.Add(token);
-
-        foreach(char token in operators)
-            result.Add(token.ToString());
-
-        return result;
-    }
-
-
     public float PostFixCalculation(Queue postFix)
     {
         FloatStack valueStack = new FloatStack();
@@ -144,32 +133,38 @@ public class Tokens
 
         foreach(char i in postFix.ToArray())
         {
-            float a = 0, b = 0;
             if (char.IsDigit(i))
             {
                 number += i;
             }
-            else if(i == ' ')
+            else if (i == ' ')
             {
-                if (number != " ")
+                if (number != "")
                 {
                     valueStack.Push(float.Parse(number));
                     number = "";
                 }
             }
+            else if (i == '|')
+            {
+                valueStack.Push((float)Math.Abs(valueStack.Pop()));
+            }
             else
             {
-                b = valueStack.Pop();
-                a = valueStack.Pop();
-            }
-            switch (i)
-            {
-                case '+': valueStack.Push(a + b); break;
-                case '-': valueStack.Push(a - b); break;
-                case '/': valueStack.Push(a / b); break;
-                case ':': valueStack.Push(a / b); break;
-                case '*': valueStack.Push(a * b); break;
-                case '^': valueStack.Push((float)Math.Pow(a,b)); break;
+                if (valueStack.Count() < 2)
+                    throw new InvalidOperationException("Not enough operands for the operator.");
+                float b = valueStack.Pop();
+                float a = valueStack.Pop();
+
+                switch (i)
+                {
+                    case '+': valueStack.Push(a + b); break;
+                    case '-': valueStack.Push(a - b); break;
+                    case '/': valueStack.Push(a / b); break;
+                    case ':': valueStack.Push(a / b); break;
+                    case '*': valueStack.Push(a * b); break;
+                    case '^': valueStack.Push((float)Math.Pow(a, b)); break;
+                }
             }
         }
         return valueStack.Pop();

@@ -16,8 +16,7 @@ public class OperatorStack
         if (_pointer == _array.Length)
             throw new Exception("Stack overflowed");
 
-        _array[_pointer] = value;
-        _pointer++;
+        _array[_pointer++] = value;
     }
 
     public char Pop()
@@ -25,14 +24,13 @@ public class OperatorStack
         if (_pointer == 0)
             throw new Exception("Stack is Empty");
 
-        _pointer--;
-        return _array[_pointer];
+        return _array[--_pointer];
     }
     public int Count()
     {
         return _pointer;
     }
-    
+     
     public char Peek()
     {
         if (_pointer == 0)
@@ -44,7 +42,9 @@ public class OperatorStack
 public class FloatStack
 {
     private const int Capacity = 50;
+
     private float[] _array = new float[Capacity];
+
     private int _pointer = 0;
 
     public void Push(float value)
@@ -60,7 +60,10 @@ public class FloatStack
         if (_pointer == 0)
             throw new Exception("Stack is Empty");
 
-        _pointer--;
-        return _array[_pointer];
+        return _array[--_pointer];
+    }
+    public int Count()
+    {
+        return _pointer;
     }
 }
