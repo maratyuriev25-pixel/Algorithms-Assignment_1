@@ -13,7 +13,7 @@ public class Tokens
 
     public bool IsOperator(char i)
     {
-        if ((i == '+') || (i == '-') || (i == '*') || (i == '/') || (i == ':') || (i == '^') || (i == 'u') || (i == 'c') || (i == 's'))
+        if ((i == '+') || (i == '-') || (i == '*') || (i == '/') || (i == ':') || (i == '^') || (i == 'u') || (i == 'c') || (i == 's') || (i == 'm'))
             return true;
         else
             return false;
@@ -23,7 +23,7 @@ public class Tokens
     {
         return op switch
         {
-            'u' or 's' or 'c' => 4,
+            'u' or 's' or 'c' or 'm' => 4,
             '^' => 3,
             '*' or '/' or ':' => 2,
             '+' or '-' => 1,
@@ -125,7 +125,7 @@ public class Tokens
         opStack = new OperatorStack();
         string number = "";
 
-        infix = infix.Replace("sin", "s").Replace("cos", "c");
+        infix = infix.Replace("sin", "s").Replace("cos", "c").Replace("max", "m");
 
         for (int i = 0; i <  infix.Length; i++)
         {
@@ -137,7 +137,7 @@ public class Tokens
                 continue;
             }
 
-            if (char.IsLetter(token) && token != 's' && token != 'c')
+            if (char.IsLetter(token) && token != 's' && token != 'c' && token != 'm')
             {
                 string varName = token.ToString();
                 if (!variables.ContainsKey(varName))
@@ -223,6 +223,14 @@ public class Tokens
             {
                 float a = valueStack.Pop();
                 valueStack.Push((float)Math.Cos(a * Math.PI / 180));
+            }
+            else if (i == 'm')
+            {
+                if (valueStack.Count() < 2)
+                    throw new InvalidOperationException("Not enough operands for max function.");
+                float b = valueStack.Pop();
+                float a = valueStack.Pop();
+                valueStack.Push(Math.Max(a, b));
             }
 
             else
